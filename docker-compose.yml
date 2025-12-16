@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:17.6
     container_name: vdi_admin_postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: vdi_admin
       POSTGRES_PASSWORD: $(POSTGRES_PASSWORD)
@@ -19,11 +19,20 @@ services:
   influxdb:
     image: influxdb:2.7.12
     container_name: vdi_influx_db
-    restart: always
+    restart: unless-stopped
     ports:
       - "8086:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb2
+    networks:
+      - vdi_network
+
+  kafka:
+    image: apache/kafka:4.1.0
+    container_name: vdi_kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
     networks:
       - vdi_network
 
@@ -32,7 +41,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: vdi_system_admin_app
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env.local
     ports:
