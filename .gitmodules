@@ -1,0 +1,3 @@
+[submodule "nixos-config"]
+	path = nixos-config
+	url = git@end:ENDragnee/vdi_nixos_config.git
