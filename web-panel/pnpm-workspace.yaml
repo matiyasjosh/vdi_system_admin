@@ -6,6 +6,9 @@ ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 
+onlyBuiltDependencies:
+  - bcrypt
+
 overrides:
   ajv@<8.18.0: '>=8.18.0'
   hono@<4.11.10: '>=4.11.10'

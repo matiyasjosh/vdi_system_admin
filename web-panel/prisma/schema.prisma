@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -14,20 +14,20 @@ enum Role {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String   @unique
-  password      String
-  role          Role      @default(FACULTY)
+  id       String  @id @default(cuid())
+  name     String?
+  email    String  @unique
+  password String
+  role     Role    @default(FACULTY)
 
-  labId         String?
-  lab           Lab?       @relation(fields: [labId], references: [id])
-  
-  sessions      Session[]
-  logs          Log[]
+  labId String?
+  lab   Lab?    @relation(fields: [labId], references: [id])
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  sessions Session[]
+  logs     Log[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -36,64 +36,63 @@ model Session {
   id           String   @id @default(cuid())
   ipAddress    String?
   userAgent    String?
-  expires      DateTime
+  expiresAt    DateTime
   sessionToken String   @unique
 
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("sessions")
 }
 
 model Lab {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
   description String?
 
-  users       User[]
-  vms         VM[]
+  users User[]
+  vms   VM[]
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([name])
   @@map("labs")
 }
 
 model VM {
-  id           String   @id @default(cuid())
-  proxmoxId    Int      @unique
-  hostname     String
-  ipAddress    String   @unique
-  
-  labId        String
-  lab          Lab      @relation(fields: [labId], references: [id])
+  id        String @id @default(cuid())
+  proxmoxId Int    @unique
+  hostname  String
+  ipAddress String @unique
 
-  packages     VMPackage[]
+  labId String
+  lab   Lab    @relation(fields: [labId], references: [id])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  packages VMPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([proxmoxId])
   @@index([hostname])
   @@index([ipAddress])
-
   @@map("vms")
 }
 
 model Package {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
   version     String?
   description String?
-  
-  vmStatuses  VMPackage[]
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  vmStatuses VMPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([name])
   @@map("packages")
@@ -107,76 +106,75 @@ enum InstallStatus {
 }
 
 model VMPackage {
-  id        String        @id @default(cuid())
-  status    InstallStatus @default(MISSING)
+  id     String        @id @default(cuid())
+  status InstallStatus @default(MISSING)
 
   vmId      String
   packageId String
 
-  vm        VM      @relation(fields: [vmId], references: [id], onDelete: Cascade)
-  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  vm      VM      @relation(fields: [vmId], references: [id], onDelete: Cascade)
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([vmId, packageId])
   @@index([vmId])
   @@index([status])
-  
   @@map("vm_packages")
 }
 
 enum LogSeverity {
-  INFO      
-  WARNING   
-  ERROR     
-  FATAL     
+  INFO
+  WARNING
+  ERROR
+  FATAL
 }
 
 enum LogType {
   AUTH_LOGIN_SUCCESS
   AUTH_LOGIN_FAILED
   AUTH_LOGOUT
-  AUTH_ROLE_CHANGED        
+  AUTH_ROLE_CHANGED
 
-  VM_PROVISIONED           
+  VM_PROVISIONED
   VM_STARTED
   VM_STOPPED
   VM_REBOOTED
-  VM_DESTROYED             
+  VM_DESTROYED
   VM_SNAPSHOT_CREATED
   VM_SNAPSHOT_RESTORED
 
-  NIX_SYNC_REQUESTED       
-  NIX_BUILD_SUCCESS        
-  NIX_BUILD_FAILED         
-  PACKAGE_STATE_MISMATCH  
-  
+  NIX_SYNC_REQUESTED
+  NIX_BUILD_SUCCESS
+  NIX_BUILD_FAILED
+  PACKAGE_STATE_MISMATCH
+
   LAB_CREATED
   LAB_UPDATED
   LAB_DELETED
 
-  PROXMOX_API_ERROR        
-  NETWORK_DISCONNECT       
+  PROXMOX_API_ERROR
+  NETWORK_DISCONNECT
 }
 
 model Log {
-  id          String      @id @default(cuid())
-  type        LogType
-  severity    LogSeverity @default(INFO)
-  
-  message     String      @db.Text
-  details     Json?       
+  id       String      @id @default(cuid())
+  type     LogType
+  severity LogSeverity @default(INFO)
 
-  userId      String?
-  user        User?       @relation(fields:[userId], references:[id], onDelete: SetNull)
-  
-  ipAddress   String?     
+  message String @db.Text
+  details Json?
 
-  targetId    String?     
-  targetName  String?     
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  createdAt   DateTime    @default(now())
+  ipAddress String?
+
+  targetId   String?
+  targetName String?
+
+  createdAt DateTime @default(now())
 
   @@index([type])
   @@index([severity])
@@ -184,6 +182,5 @@ model Log {
   @@index([ipAddress])
   @@index([targetId])
   @@index([targetName])
-
   @@map("logs")
 }
